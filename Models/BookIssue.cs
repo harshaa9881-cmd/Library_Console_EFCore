@@ -2,9 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Library_Console_EFCore.Models
+
+namespace LibraryManagementSystem.Models
 {
-    internal class BookIssue
+    public class BookIssue
     {
+        public int BookIssueId { get; set; }
+        public int BookId { get; set; }
+        public int MemberId { get; set; }
+        public DateTime IssueDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
     }
 }
+

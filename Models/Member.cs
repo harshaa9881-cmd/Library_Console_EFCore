@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Library_Console_EFCore.Models
+
+namespace LibraryManagementSystem.Models
 {
-    internal class Member
+    public class Member
     {
+        public int MemberId { get; set; }
+        public string MemberName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }
+
