@@ -65,7 +65,7 @@ namespace LibraryManagementSystem.Repositories
                 return false;
             }
 
-            _context.Members.Remove(member);
+            _context.Members.Remove(member);                                                          
             await _context.SaveChangesAsync();
 
             return true;
