@@ -1,43 +1,92 @@
 ﻿
 using LibraryManagementSystem.Models;
-using LibraryManagementSystem.Repositories;
+using LibraryManagementSystem.Data;
 
 namespace LibraryManagementSystem.Services
 {
     public class MemberService
     {
-        private readonly MemberRepository _memberRepository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public MemberService(MemberRepository memberRepository)
+        public MemberService(UnitOfWork unitOfWork)
         {
-            _memberRepository = memberRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<Member>> GetAllAsync()
         {
-            return await _memberRepository.GetAllAsync();
+            return await _unitOfWork.MemberRepository.GetAllAsync();
         }
 
         public async Task<Member?> GetByIdAsync(int memberId)
         {
-            return await _memberRepository.GetByIdAsync(memberId);
+            return await _unitOfWork.MemberRepository.GetByIdAsync(memberId);
         }
 
         public async Task AddAsync(Member member)
         {
             ValidateMember(member);
-            await _memberRepository.AddAsync(member);
+
+            await _unitOfWork.MemberRepository.AddAsync(member);
+
+            var auditLog = new AuditLog
+            {
+                Action = "Add Member",
+                Description = $"Member '{member.MemberName}' added.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<bool> UpdateAsync(Member member)
         {
             ValidateMember(member);
-            return await _memberRepository.UpdateAsync(member);
+
+            bool result = await _unitOfWork.MemberRepository.UpdateAsync(member);
+
+            if (!result)
+            {
+                return false;
+            }
+
+            var auditLog = new AuditLog
+            {
+                Action = "Update Member",
+                Description = $"Member ID {member.MemberId} updated.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<bool> DeleteAsync(int memberId)
         {
-            return await _memberRepository.DeleteAsync(memberId);
+            bool result = await _unitOfWork.MemberRepository.DeleteAsync(memberId);
+
+            if (!result)
+            {
+                return false;
+            }
+
+            var auditLog = new AuditLog
+            {
+                Action = "Delete Member",
+                Description = $"Member ID {memberId} deleted.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
 
         private void ValidateMember(Member member)

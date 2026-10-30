@@ -27,17 +27,15 @@ builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BookIssueService>();
 builder.Services.AddScoped<AuditLogService>();
 
+// Register Unit of Work
+builder.Services.AddScoped<UnitOfWork>();
+
 // Register menus
 builder.Services.AddScoped<BookMenu>();
 builder.Services.AddScoped<MemberMenu>();
 builder.Services.AddScoped<BookIssueMenu>();
 
 using var host = builder.Build();
-using var scope = host.Services.CreateScope();
-
-var bookMenu = scope.ServiceProvider.GetRequiredService<BookMenu>();
-var memberMenu = scope.ServiceProvider.GetRequiredService<MemberMenu>();
-var bookIssueMenu = scope.ServiceProvider.GetRequiredService<BookIssueMenu>();
 
 while (true)
 {
@@ -50,17 +48,22 @@ while (true)
 
     string choice = Console.ReadLine() ?? "";
 
+    using var scope = host.Services.CreateScope();
+
     switch (choice)
     {
         case "1":
+            var bookMenu = scope.ServiceProvider.GetRequiredService<BookMenu>();
             await bookMenu.ShowMenuAsync();
             break;
 
         case "2":
+            var memberMenu = scope.ServiceProvider.GetRequiredService<MemberMenu>();
             await memberMenu.ShowMenuAsync();
             break;
 
         case "3":
+            var bookIssueMenu = scope.ServiceProvider.GetRequiredService<BookIssueMenu>();
             await bookIssueMenu.ShowMenuAsync();
             break;
 

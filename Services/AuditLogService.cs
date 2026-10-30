@@ -1,33 +1,33 @@
 ﻿
 using LibraryManagementSystem.Models;
-using LibraryManagementSystem.Repositories;
+using LibraryManagementSystem.Data;
 
 namespace LibraryManagementSystem.Services
 {
     public class AuditLogService
     {
-        private readonly AuditLogRepository _repository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public AuditLogService(AuditLogRepository repository)
+        public AuditLogService(UnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<AuditLog>> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            return await _unitOfWork.AuditLogRepository.GetAllAsync();
         }
 
         public async Task AddAsync(string action, string description)
         {
             if (string.IsNullOrWhiteSpace(action))
             {
-                throw new Exception("Action cannot be empty.");
+                throw new ArgumentException("Action cannot be empty.");
             }
 
             if (string.IsNullOrWhiteSpace(description))
             {
-                throw new Exception("Description cannot be empty.");
+                throw new ArgumentException("Description cannot be empty.");
             }
 
             AuditLog auditLog = new AuditLog
@@ -37,7 +37,9 @@ namespace LibraryManagementSystem.Services
                 ActionDate = DateTime.Now
             };
 
-            await _repository.AddAsync(auditLog);
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

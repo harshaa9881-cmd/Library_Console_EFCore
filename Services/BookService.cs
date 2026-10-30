@@ -1,26 +1,26 @@
 ﻿
 using LibraryManagementSystem.Models;
-using LibraryManagementSystem.Repositories;
+using LibraryManagementSystem.Data;
 
 namespace LibraryManagementSystem.Services
 {
     public class BookService
     {
-        private readonly BookRepository _bookRepository;
+        private readonly UnitOfWork _unitOfWork;
 
-        public BookService(BookRepository bookRepository)
+        public BookService(UnitOfWork unitOfWork)
         {
-            _bookRepository = bookRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<Book>> GetAllAsync()
         {
-            return await _bookRepository.GetAllAsync();
+            return await _unitOfWork.BookRepository.GetAllAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int bookId)
         {
-            return await _bookRepository.GetByIdAsync(bookId);
+            return await _unitOfWork.BookRepository.GetByIdAsync(bookId);
         }
 
         public async Task<List<Book>> SearchAsync(string searchText)
@@ -30,37 +30,84 @@ namespace LibraryManagementSystem.Services
                 throw new ArgumentException("Search text cannot be empty.");
             }
 
-            return await _bookRepository.SearchAsync(searchText);
+            return await _unitOfWork.BookRepository.SearchAsync(searchText);
         }
 
         public async Task AddAsync(Book book)
         {
             ValidateBook(book);
 
-            if (await _bookRepository.IsISBNExistsAsync(book.ISBN))
+            if (await _unitOfWork.BookRepository.IsISBNExistsAsync(book.ISBN))
             {
                 throw new ArgumentException("This ISBN already exists.");
             }
 
-            await _bookRepository.AddAsync(book);
+            await _unitOfWork.BookRepository.AddAsync(book);
+
+            var auditLog = new AuditLog
+            {
+                Action = "Add Book",
+                Description = $"Book '{book.Title}' added.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<bool> UpdateAsync(Book book)
         {
             ValidateBook(book);
 
-            if (await _bookRepository.IsISBNExistsAsync(
+            if (await _unitOfWork.BookRepository.IsISBNExistsAsync(
                 book.ISBN, book.BookId))
             {
                 throw new ArgumentException("This ISBN already exists.");
             }
 
-            return await _bookRepository.UpdateAsync(book);
+            bool result = await _unitOfWork.BookRepository.UpdateAsync(book);
+
+            if (!result)
+            {
+                return false;
+            }
+
+            var auditLog = new AuditLog
+            {
+                Action = "Update Book",
+                Description = $"Book ID {book.BookId} updated.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<bool> DeleteAsync(int bookId)
         {
-            return await _bookRepository.DeleteAsync(bookId);
+            bool result = await _unitOfWork.BookRepository.DeleteAsync(bookId);
+
+            if (!result)
+            {
+                return false;
+            }
+
+            var auditLog = new AuditLog
+            {
+                Action = "Delete Book",
+                Description = $"Book ID {bookId} deleted.",
+                ActionDate = DateTime.Now
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
 
         private void ValidateBook(Book book)
