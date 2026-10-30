@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 using LibraryManagementSystem.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -24,20 +21,21 @@ namespace LibraryManagementSystem.Data
             AuditLogRepository auditLogRepository)
         {
             _context = context;
+
             BookRepository = bookRepository;
             MemberRepository = memberRepository;
             BookIssueRepository = bookIssueRepository;
             AuditLogRepository = auditLogRepository;
         }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync()
-        {
-            return await _context.Database.BeginTransactionAsync();
-        }
-
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
     }
 }
