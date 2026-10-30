@@ -31,3 +31,10 @@ We don't want the database to end up with:
 - Book issue record created.
 - Audit log missing.
 Instead, all three changes should roll back.
+
+here:
+We'll also implement our first complete transaction:
+
+Issue Book = Update Book Availability + Create BookIssue + Create AuditLog.
+
+All three changes must succeed together. If one fails, all three should roll back.
