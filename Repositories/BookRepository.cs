@@ -16,12 +16,14 @@ namespace LibraryManagementSystem.Repositories
 
         public async Task<List<Book>> GetAllAsync()
         {
-            return await _context.Books.ToListAsync();
+            return await _context.Books
+                .ToListAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int bookId)
         {
-            return await _context.Books.FindAsync(bookId);
+            return await _context.Books
+                .FirstOrDefaultAsync(b => b.BookId == bookId);
         }
 
         public async Task<List<Book>> SearchAsync(string searchText)
@@ -34,19 +36,19 @@ namespace LibraryManagementSystem.Repositories
 
         public async Task<bool> IsISBNExistsAsync(string isbn, int bookId = 0)
         {
-            return await _context.Books.AnyAsync(
-                b => b.ISBN == isbn && b.BookId != bookId);
+            return await _context.Books
+                .AnyAsync(b => b.ISBN == isbn && b.BookId != bookId);
         }
 
         public async Task AddAsync(Book book)
         {
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
+            await _context.Books.AddAsync(book);
         }
 
         public async Task<bool> UpdateAsync(Book book)
         {
-            var existingBook = await _context.Books.FindAsync(book.BookId);
+            var existingBook = await _context.Books
+                .FirstOrDefaultAsync(b => b.BookId == book.BookId);
 
             if (existingBook == null)
             {
@@ -60,13 +62,13 @@ namespace LibraryManagementSystem.Repositories
             existingBook.TotalCopies = book.TotalCopies;
             existingBook.AvailableCopies = book.AvailableCopies;
 
-            await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteAsync(int bookId)
         {
-            var book = await _context.Books.FindAsync(bookId);
+            var book = await _context.Books
+                .FirstOrDefaultAsync(b => b.BookId == bookId);
 
             if (book == null)
             {
@@ -82,7 +84,6 @@ namespace LibraryManagementSystem.Repositories
             }
 
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
 
             return true;
         }

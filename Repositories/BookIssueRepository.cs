@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-
-using LibraryManagementSystem.Data;
+﻿using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,20 +15,23 @@ namespace LibraryManagementSystem.Repositories
 
         public async Task<List<BookIssue>> GetAllAsync()
         {
-            return await _context.BookIssues.ToListAsync();
+            return await _context.BookIssues
+                .ToListAsync();
         }
 
         public async Task<bool> IssueBookAsync(
             int bookId, int memberId, DateTime dueDate)
         {
-            var book = await _context.Books.FindAsync(bookId);
+            var book = await _context.Books
+                .FirstOrDefaultAsync(b => b.BookId == bookId);
 
             if (book == null)
             {
                 return false;
             }
 
-            var member = await _context.Members.FindAsync(memberId);
+            var member = await _context.Members
+                .FirstOrDefaultAsync(m => m.MemberId == memberId);
 
             if (member == null)
             {
@@ -56,9 +54,7 @@ namespace LibraryManagementSystem.Repositories
 
             book.AvailableCopies--;
 
-            _context.BookIssues.Add(bookIssue);
-
-            await _context.SaveChangesAsync();
+            await _context.BookIssues.AddAsync(bookIssue);
 
             return true;
         }
@@ -66,7 +62,7 @@ namespace LibraryManagementSystem.Repositories
         public async Task<bool> ReturnBookAsync(int bookIssueId)
         {
             var bookIssue = await _context.BookIssues
-                .FindAsync(bookIssueId);
+                .FirstOrDefaultAsync(bi => bi.BookIssueId == bookIssueId);
 
             if (bookIssue == null)
             {
@@ -78,7 +74,8 @@ namespace LibraryManagementSystem.Repositories
                 return false;
             }
 
-            var book = await _context.Books.FindAsync(bookIssue.BookId);
+            var book = await _context.Books
+                .FirstOrDefaultAsync(b => b.BookId == bookIssue.BookId);
 
             if (book == null)
             {
@@ -91,9 +88,6 @@ namespace LibraryManagementSystem.Repositories
             {
                 book.AvailableCopies++;
             }
-
-            await _context.SaveChangesAsync();
-
             return true;
         }
     }

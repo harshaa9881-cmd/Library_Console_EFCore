@@ -16,24 +16,25 @@ namespace LibraryManagementSystem.Repositories
 
         public async Task<List<Member>> GetAllAsync()
         {
-            return await _context.Members.ToListAsync();
+            return await _context.Members
+                .ToListAsync();
         }
 
         public async Task<Member?> GetByIdAsync(int memberId)
         {
-            return await _context.Members.FindAsync(memberId);
+            return await _context.Members
+                .FirstOrDefaultAsync(m => m.MemberId == memberId);
         }
 
         public async Task AddAsync(Member member)
         {
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            await _context.Members.AddAsync(member);
         }
 
         public async Task<bool> UpdateAsync(Member member)
         {
             var existingMember = await _context.Members
-                .FindAsync(member.MemberId);
+                .FirstOrDefaultAsync(m => m.MemberId == member.MemberId);
 
             if (existingMember == null)
             {
@@ -44,13 +45,13 @@ namespace LibraryManagementSystem.Repositories
             existingMember.Email = member.Email;
             existingMember.PhoneNumber = member.PhoneNumber;
 
-            await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteAsync(int memberId)
         {
-            var member = await _context.Members.FindAsync(memberId);
+            var member = await _context.Members
+                .FirstOrDefaultAsync(m => m.MemberId == memberId);
 
             if (member == null)
             {
@@ -65,8 +66,7 @@ namespace LibraryManagementSystem.Repositories
                 return false;
             }
 
-            _context.Members.Remove(member);                                                          
-            await _context.SaveChangesAsync();
+            _context.Members.Remove(member);
 
             return true;
         }

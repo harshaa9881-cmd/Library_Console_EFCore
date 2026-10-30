@@ -1,4 +1,5 @@
-﻿using LibraryManagementSystem.Data;
+﻿
+using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +23,7 @@ namespace LibraryManagementSystem.Repositories
 
         public async Task AddAsync(AuditLog auditLog)
         {
-            _context.AuditLogs.Add(auditLog);
-            await _context.SaveChangesAsync();
+            await _context.AuditLogs.AddAsync(auditLog);
         }
     }
 }
