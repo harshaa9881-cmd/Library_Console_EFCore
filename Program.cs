@@ -19,11 +19,13 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
 builder.Services.AddScoped<BookRepository>();
 builder.Services.AddScoped<MemberRepository>();
 builder.Services.AddScoped<BookIssueRepository>();
+builder.Services.AddScoped<AuditLogRepository>();
 
 // Register services
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BookIssueService>();
+builder.Services.AddScoped<AuditLogService>();
 
 // Register menus
 builder.Services.AddScoped<BookMenu>();
